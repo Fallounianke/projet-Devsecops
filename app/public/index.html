@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevSecOps Operations Center</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-primary: #f1f5f9;       /* Fond clair bleu-gris doux */
+      --bg-card: #ffffff;          /* Cartes blanches épurées */
+      --accent: #2563eb;           /* Bleu royal dynamique */
+      --text-main: #0f172a;        /* Texte sombre lisible */
+      --text-muted: #64748b;      /* Texte secondaire gris */
+      --border: #e2e8f0;          /* Bordures légères */
+      --success: #059669;         /* Vert statut */
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+    header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .logo-zone { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { font-size: 1.5rem; color: var(--accent); }
+    .logo-text { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; }
+    
+    .badge-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: var(--success);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .pulse-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
+
+    main { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; width: 100%; }
+
+    .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+    .card-header { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+    .card-value { font-size: 1.6rem; font-weight: 700; color: var(--accent); font-family: monospace; }
+    .card-footer { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+    .pipeline-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .pipeline-steps { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .step-box {
+      flex: 1;
+      min-width: 180px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 1.2rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .step-box i { font-size: 1.6rem; color: var(--accent); margin-bottom: 0.5rem; }
+    .step-box h4 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .step-box p { font-size: 0.8rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-zone">
+      <i class="fa-solid fa-shield-halved logo-icon"></i>
+      <div class="logo-text">DevSecOps Cluster Dashboard</div>
+    </div>
+    <div class="badge-status">
+      <span class="pulse-dot"></span> Cluster Healthy
+    </div>
+  </header>
+
+  <main>
+    <div class="grid-cards">
+      <div class="card">
+        <div class="card-header"><span>Nœud / Pod cible</span><i class="fa-solid fa-cubes"></i></div>
+        <div class="card-value" id="podName">Chargement...</div>
+        <div class="card-footer">Identifiant unique généré par K8s</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span>Utilisation Mémoire</span><i class="fa-solid fa-memory"></i></div>
+        <div class="card-value" id="memoryUsage">- MB</div>
+        <div class="card-footer">Consommation RAM du conteneur</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span>Uptime Processus</span><i class="fa-solid fa-clock"></i></div>
+        <div class="card-value" id="uptime">-</div>
+        <div class="card-footer">Temps d'exécution continu</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span>Dernière synchro</span><i class="fa-solid fa-arrows-rotate"></i></div>
+        <div class="card-value" id="lastSync">-</div>
+        <div class="card-footer">Mise à jour toutes les 3s</div>
+      </div>
+    </div>
+
+    <div class="pipeline-section">
+      <h3><i class="fa-solid fa-diagram-project" style="color: var(--accent);"></i> Pipeline de Déploiement Actif</h3>
+      <div class="pipeline-steps">
+        <div class="step-box">
+          <i class="fa-brands fa-github"></i>
+          <h4>1. GitHub</h4>
+          <p>Commit & Push</p>
+        </div>
+        <div class="step-box">
+          <i class="fa-solid fa-gears"></i>
+          <h4>2. CI/CD</h4>
+          <p>GitHub Actions</p>
+        </div>
+        <div class="step-box">
+          <i class="fa-brands fa-docker"></i>
+          <h4>3. Registry</h4>
+          <p>Docker Hub Image</p>
+        </div>
+        <div class="step-box">
+          <i class="fa-solid fa-infinity"></i>
+          <h4>4. GitOps</h4>
+          <p>ArgoCD Sync</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function updateDashboard() {
+      try {
+        const response = await fetch('/api/info');
+        const data = await response.json();
+        
+        document.getElementById('podName').innerText = data.podName;
+        document.getElementById('memoryUsage').innerText = data.memoryUsage;
+        document.getElementById('uptime').innerText = data.uptime + 's';
+        document.getElementById('lastSync').innerText = new Date(data.timestamp).toLocaleTimeString();
+      } catch (err) {
+        console.error("Erreur de récupération des données :", err);
+      }
+    }
+
+    updateDashboard();
+    setInterval(updateDashboard, 3000);
+  </script>
+</body>
+</html>

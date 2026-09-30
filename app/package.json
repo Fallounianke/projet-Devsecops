@@ -1,0 +1,12 @@
+{
+  "name": "devsecops-real-app",
+  "version": "1.0.0",
+  "description": "App de démonstration K8s / DevSecOps",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
